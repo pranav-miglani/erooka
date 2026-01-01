@@ -7,7 +7,7 @@
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, QueryCommand, GetItemCommand, PutItemCommand, ScanCommand } from "@aws-sdk/lib-dynamodb"
-import { v4 as uuidv4 } from "uuid"
+import { randomUUID } from "crypto"
 import type { Account, AccountRepository, CreateAccountInput } from "../../../domain/account/Account"
 import { ConflictError, NotFoundError } from "../../../shared/errors"
 
@@ -25,9 +25,6 @@ export class DynamoDBAccountRepository implements AccountRepository {
       TableName: this.tableName,
       IndexName: "email-index",
       KeyConditionExpression: "GSI3PK = :email",
-      ExpressionAttributeValues: {
-        ":email": `EMAIL#${email}`,
-      },
       FilterExpression: "is_active = :active",
       ExpressionAttributeValues: {
         ":email": `EMAIL#${email}`,
@@ -103,7 +100,7 @@ export class DynamoDBAccountRepository implements AccountRepository {
       }
     }
 
-    const accountId = uuidv4()
+    const accountId = randomUUID()
     const now = new Date()
 
     const account: Account = {
