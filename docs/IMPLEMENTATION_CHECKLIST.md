@@ -17,13 +17,18 @@
 - [ ] Terraform infrastructure code
 
 ### Phase 1: Authentication & Authorization
-- [ ] Account entity (DynamoDB)
-- [ ] Login API (POST /api/login)
-- [ ] Session management (HTTP-only cookies)
-- [ ] RBAC system
-- [ ] Middleware for route protection
-- [ ] GET /api/me endpoint
-- [ ] **Tests**: Unit + Integration + Cucumber features
+- [x] Account entity (DynamoDB) - Domain model created
+- [x] AccountRepository interface and DynamoDB implementation
+- [x] AuthService with login, password hashing, session management
+- [x] Login API handler (POST /api/login) - Lambda function
+- [x] GET /api/me endpoint handler - Lambda function
+- [x] Session management (HTTP-only cookies, base64 encoding)
+- [x] RBAC system (shared/rbac)
+- [ ] Middleware for route protection (API Gateway authorizer)
+- [x] Unit tests for AuthService
+- [x] Cucumber feature file for authentication
+- [ ] Integration tests with DynamoDB Local
+- [ ] **Tests**: Complete test coverage
 
 ### Phase 2: Organizations
 - [ ] Organization entity (DynamoDB)
