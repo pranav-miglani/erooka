@@ -27,5 +27,8 @@ module.exports = {
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  testEnvironmentOptions: {
+    url: 'http://localhost',
+  },
 };
 
