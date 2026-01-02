@@ -109,24 +109,27 @@
 - [ ] GET /api/workorders/org/[orgId] (get org work orders - can use GET /api/workorders?orgId=X)
 - [ ] **Tests**: Unit + Integration + Cucumber features
 
-### Phase 7: WMS (Weather Monitoring System)
-- [ ] WMS Vendor entity (DynamoDB)
-- [ ] WMS Site entity (DynamoDB)
-- [ ] WMS Device entity (DynamoDB)
-- [ ] Insolation Reading entity (DynamoDB with TTL)
-- [ ] GET /api/wms-vendors (list)
-- [ ] POST /api/wms-vendors (create)
-- [ ] GET /api/wms-vendors/[id]/sites (get sites)
-- [ ] GET /api/wms-vendors/[id]/devices (get devices)
-- [ ] POST /api/wms-vendors/[id]/sync-sites (sync sites)
-- [ ] POST /api/wms-vendors/[id]/sync-devices (sync devices)
-- [ ] POST /api/wms-vendors/[id]/sync-insolation (sync insolation)
-- [ ] GET /api/wms-sites (list)
-- [ ] GET /api/wms-sites/[id] (get single site)
-- [ ] GET /api/wms-devices (list)
-- [ ] GET /api/wms-devices/[id] (get single device)
-- [ ] GET /api/insolation-readings (get readings with filters)
-- [ ] WMS sync services
+### Phase 7: WMS (Weather Monitoring System) ✅
+- [x] WMS Vendor entity (DynamoDB) - Domain model created
+- [x] WMS Site entity (DynamoDB) - Domain model created
+- [x] WMS Device entity (DynamoDB) - Domain model created
+- [x] Insolation Reading entity (DynamoDB with TTL) - Domain model created
+- [x] WMSVendorRepository (DynamoDB implementation)
+- [x] WMSSiteRepository (DynamoDB implementation)
+- [x] WMSDeviceRepository (DynamoDB implementation)
+- [x] InsolationReadingRepository (DynamoDB implementation)
+- [x] WMSService - Business logic and validation
+- [x] GET /api/wms-vendors (list with RBAC filtering)
+- [x] POST /api/wms-vendors (create - SUPERADMIN only)
+- [x] GET /api/wms-sites (list with filters)
+- [x] GET /api/wms-devices (list with filters)
+- [x] GET /api/insolation-readings (get readings with filters)
+- [ ] GET /api/wms-vendors/[id]/sites (get sites - can use GET /api/wms-sites?vendorId=X)
+- [ ] GET /api/wms-vendors/[id]/devices (get devices - can use GET /api/wms-devices?vendorId=X)
+- [ ] POST /api/wms-vendors/[id]/sync-sites (sync sites - requires WMS adapters)
+- [ ] POST /api/wms-vendors/[id]/sync-devices (sync devices - requires WMS adapters)
+- [ ] POST /api/wms-vendors/[id]/sync-insolation (sync insolation - requires WMS adapters)
+- [ ] WMS sync services (requires WMS adapters)
 - [ ] **Tests**: Unit + Integration + Cucumber features
 
 ### Phase 8: Sync Services (Cron Jobs)
@@ -152,11 +155,13 @@
 - [ ] GET /api/analytics/vendors (vendor analytics)
 - [ ] **Tests**: Unit + Integration + Cucumber features
 
-### Phase 10: Dashboard
-- [ ] GET /api/dashboard (role-specific dashboard data)
-- [ ] Dashboard metrics calculation (SUPERADMIN/GOVT/ORG)
-- [ ] **Key Requirement**: Metrics aggregate from plants mapped to work orders only (not all plants)
-- [ ] SUPERADMIN: All work orders, all mapped plants
+### Phase 10: Dashboard ✅
+- [x] GET /api/dashboard (role-specific dashboard data)
+- [x] Dashboard metrics calculation (SUPERADMIN/GOVT/ORG)
+- [x] **Key Requirement**: Metrics aggregate from plants mapped to work orders only (not all plants)
+- [x] SUPERADMIN: All work orders, all mapped plants, active alerts
+- [x] GOVT: All work orders, all mapped plants, no alerts
+- [x] ORG: Org work orders, org mapped plants, org active alerts
 - [ ] GOVT: All work orders, all mapped plants (same as SUPERADMIN, different widgets)
 - [ ] ORG: Org work orders, org mapped plants
 - [ ] Role-based widget visibility
