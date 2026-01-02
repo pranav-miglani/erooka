@@ -90,20 +90,23 @@
 - [ ] Grid downtime calculation
 - [ ] **Tests**: Unit + Integration + Cucumber features
 
-### Phase 6: Work Orders
-- [ ] Work Order entity (DynamoDB)
-- [ ] Work Order Plant mappings table (work-order-plants, DynamoDB)
-- [ ] GET /api/workorders (list with RBAC filtering)
-- [ ] POST /api/workorders (create - SUPERADMIN only)
-- [ ] GET /api/workorders/[id] (get single work order)
-- [ ] PATCH /api/workorders/[id] (update - SUPERADMIN only)
-- [ ] DELETE /api/workorders/[id] (delete - SUPERADMIN only)
-- [ ] GET /api/workorders/[id]/plants (get work order plants)
-- [ ] POST /api/workorders/[id]/plants (add plants)
-- [ ] DELETE /api/workorders/[id]/plants/[plantId] (remove plant)
-- [ ] GET /api/workorders/[id]/production (production metrics)
+### Phase 6: Work Orders ✅
+- [x] Work Order entity (DynamoDB) - Domain model created
+- [x] Work Order Plant mappings table (work-order-plants, DynamoDB) - Repository created
+- [x] WorkOrderRepository (DynamoDB implementation)
+- [x] WorkOrderPlantRepository (DynamoDB implementation)
+- [x] WorkOrderService - Business logic, validation, one active per plant enforcement
+- [x] GET /api/workorders (list with RBAC filtering)
+- [x] POST /api/workorders (create - SUPERADMIN only)
+- [x] GET /api/workorders/[id] (get single work order)
+- [x] PUT /api/workorders/[id] (update - SUPERADMIN only)
+- [x] DELETE /api/workorders/[id] (delete - SUPERADMIN only)
+- [x] GET /api/workorders/[id]/production (production metrics)
+- [ ] GET /api/workorders/[id]/plants (get work order plants - can use GET /api/workorders/[id])
+- [ ] POST /api/workorders/[id]/plants (add plants - can use PUT /api/workorders/[id] with plantIds)
+- [ ] DELETE /api/workorders/[id]/plants/[plantId] (remove plant - can use PUT /api/workorders/[id])
 - [ ] GET /api/workorders/[id]/efficiency (efficiency metrics)
-- [ ] GET /api/workorders/org/[orgId] (get org work orders)
+- [ ] GET /api/workorders/org/[orgId] (get org work orders - can use GET /api/workorders?orgId=X)
 - [ ] **Tests**: Unit + Integration + Cucumber features
 
 ### Phase 7: WMS (Weather Monitoring System)
