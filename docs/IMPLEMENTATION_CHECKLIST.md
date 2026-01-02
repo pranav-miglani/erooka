@@ -80,13 +80,13 @@
 
 ### Phase 5: Alerts 🚧
 - [x] Alert entity (DynamoDB with TTL) - Domain model created
-- [ ] AlertRepository (DynamoDB implementation)
-- [ ] AlertService
-- [ ] GET /api/alerts (list with RBAC filtering, pagination)
-- [ ] GET /api/alerts?plantId=X (filter by plant)
-- [ ] PATCH /api/alerts/[id] (update status - SUPERADMIN only)
-- [ ] Alert sync service
-- [ ] Alert deduplication logic
+- [x] AlertRepository (DynamoDB implementation) - GSI queries, batch create
+- [x] AlertService - Business logic, validation
+- [x] GET /api/alerts (list with RBAC filtering, pagination)
+- [x] GET /api/alerts?plantId=X (filter by plant)
+- [x] PATCH /api/alerts/[id] (update status - SUPERADMIN only)
+- [ ] Alert sync service (requires vendor adapters)
+- [ ] Alert deduplication logic (requires vendor_plant_id in Alert entity)
 - [ ] Grid downtime calculation
 - [ ] **Tests**: Unit + Integration + Cucumber features
 
