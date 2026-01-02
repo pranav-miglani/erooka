@@ -5,14 +5,14 @@
  * Based on WOMS accounts table structure.
  */
 
-export type AccountType = "SUPERADMIN" | "ORG" | "GOVT" | "DEVELOPER"
+export type AccountType = "SUPERADMIN" | "ORG" | "GOVT" | "DEVELOPER" // DEVELOPER is deprecated, treated as SUPERADMIN
 
 export interface Account {
   id: string // UUID
   email: string
   passwordHash: string // bcrypt hash
   accountType: AccountType
-  orgId: number | null // null for SUPERADMIN, GOVT, DEVELOPER
+  orgId: number | null // null for SUPERADMIN, GOVT (DEVELOPER deprecated, treated as SUPERADMIN)
   displayName: string | null
   logoUrl: string | null
   isActive: boolean

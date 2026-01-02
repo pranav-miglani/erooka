@@ -2,7 +2,7 @@
  * Shared Types
  */
 
-export type AccountType = "SUPERADMIN" | "ORG" | "GOVT" | "DEVELOPER"
+export type AccountType = "SUPERADMIN" | "ORG" | "GOVT" | "DEVELOPER" // DEVELOPER is deprecated, treated as SUPERADMIN
 
 export interface SessionData {
   accountId: string

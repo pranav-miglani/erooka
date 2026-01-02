@@ -2,10 +2,10 @@
  * Vendors API Handler (Lambda Function)
  * 
  * GET /api/vendors - List all vendors
- * POST /api/vendors - Create vendor (SUPERADMIN/DEVELOPER only)
+ * POST /api/vendors - Create vendor (SUPERADMIN only, DEVELOPER deprecated)
  * GET /api/vendors/[id] - Get single vendor
- * PUT /api/vendors/[id] - Update vendor (SUPERADMIN/DEVELOPER only)
- * DELETE /api/vendors/[id] - Delete vendor (SUPERADMIN/DEVELOPER only)
+ * PUT /api/vendors/[id] - Update vendor (SUPERADMIN only, DEVELOPER deprecated)
+ * DELETE /api/vendors/[id] - Delete vendor (SUPERADMIN only, DEVELOPER deprecated)
  * 
  * Based on WOMS vendors route implementation.
  */

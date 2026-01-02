@@ -31,17 +31,17 @@ export class AccountService {
       throw new ValidationError("Email, password, and account_type are required")
     }
 
-    // Validate account_type - DEVELOPER accounts cannot be created via API
+    // Validate account_type - DEVELOPER is deprecated, cannot be created
     if (!["SUPERADMIN", "ORG", "GOVT"].includes(input.accountType)) {
       throw new ValidationError(
-        "Invalid account_type. Must be SUPERADMIN, ORG, or GOVT. DEVELOPER accounts must be created via script."
+        "Invalid account_type. Must be SUPERADMIN, ORG, or GOVT. DEVELOPER is deprecated."
       )
     }
 
-    // Explicitly reject DEVELOPER account creation
+    // Explicitly reject DEVELOPER account creation (deprecated)
     if (input.accountType === "DEVELOPER") {
       throw new ValidationError(
-        "DEVELOPER accounts cannot be created via API. Use the create-developer-account script instead."
+        "DEVELOPER account type is deprecated. Use SUPERADMIN instead."
       )
     }
 
@@ -50,12 +50,12 @@ export class AccountService {
       throw new ValidationError("org_id is required for ORG accounts")
     }
 
-    // Validate org_id is null for SUPERADMIN, GOVT, and DEVELOPER
+    // Validate org_id is null for SUPERADMIN and GOVT
     if (
-      (input.accountType === "SUPERADMIN" || input.accountType === "GOVT" || input.accountType === "DEVELOPER") &&
+      (input.accountType === "SUPERADMIN" || input.accountType === "GOVT") &&
       input.orgId
     ) {
-      throw new ValidationError("org_id must be null for SUPERADMIN, GOVT, and DEVELOPER accounts")
+      throw new ValidationError("org_id must be null for SUPERADMIN and GOVT accounts")
     }
 
     // Hash password

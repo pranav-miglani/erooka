@@ -2,7 +2,7 @@
  * Accounts API Handler (Lambda Function)
  * 
  * GET /api/accounts - List all accounts (SUPERADMIN only)
- * POST /api/accounts - Create account (SUPERADMIN/DEVELOPER only)
+ * POST /api/accounts - Create account (SUPERADMIN only, DEVELOPER deprecated)
  * 
  * Based on WOMS accounts route implementation.
  */
@@ -92,12 +92,12 @@ export async function createAccountHandler(
       }
     }
 
-    // SUPERADMIN and DEVELOPER can create accounts
+    // SUPERADMIN can create accounts (DEVELOPER is deprecated, treated as SUPERADMIN)
     if (sessionData.accountType !== "SUPERADMIN" && sessionData.accountType !== "DEVELOPER") {
       return {
         statusCode: 403,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ error: "Only SUPERADMIN and DEVELOPER can create accounts" }),
+        body: JSON.stringify({ error: "Only SUPERADMIN can create accounts" }),
       }
     }
 

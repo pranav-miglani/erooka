@@ -79,6 +79,7 @@ export async function handler(
     let superAdminLogoUrl = null
     let superAdminDisplayName = null
 
+    // DEVELOPER is deprecated, treated as SUPERADMIN
     if (account.accountType === "SUPERADMIN" || account.accountType === "DEVELOPER") {
       // Use current user's info for footer
       superAdminLogoUrl = account.logoUrl

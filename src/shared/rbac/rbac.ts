@@ -90,7 +90,9 @@ export function hasPermission(
   resource: string,
   action: Permission["action"]
 ): boolean {
-  const permissions = ROLE_PERMISSIONS[accountType] || []
+  // DEVELOPER is deprecated - treat as SUPERADMIN
+  const effectiveAccountType = accountType === "DEVELOPER" ? "SUPERADMIN" : accountType
+  const permissions = ROLE_PERMISSIONS[effectiveAccountType] || []
   return permissions.some(
     (p) => p.resource === resource && p.action === action
   )
