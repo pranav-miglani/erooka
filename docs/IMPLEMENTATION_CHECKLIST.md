@@ -22,6 +22,9 @@
 - [x] AuthService with login, password hashing, session management
 - [x] Login API handler (POST /api/login) - Lambda function
 - [x] GET /api/me endpoint handler - Lambda function
+- [x] POST /api/accounts - Create account (SUPERADMIN/DEVELOPER only)
+- [x] GET /api/accounts - List accounts (SUPERADMIN only)
+- [x] AccountService for account management
 - [x] Session management (HTTP-only cookies, base64 encoding)
 - [x] RBAC system (shared/rbac)
 - [ ] Middleware for route protection (API Gateway authorizer)
@@ -31,21 +34,25 @@
 - [ ] **Tests**: Complete test coverage
 
 ### Phase 2: Organizations
-- [ ] Organization entity (DynamoDB)
-- [ ] GET /api/orgs (list with RBAC filtering)
-- [ ] POST /api/orgs (create - SUPERADMIN only)
-- [ ] GET /api/orgs/[id] (get single org)
-- [ ] PATCH /api/orgs/[id] (update - SUPERADMIN only)
+- [x] Organization entity (DynamoDB)
+- [x] GET /api/orgs (list with RBAC filtering)
+- [x] POST /api/orgs (create - SUPERADMIN only)
+- [x] GET /api/orgs/[id] (get single org)
+- [x] PUT /api/orgs/[id] (update - SUPERADMIN only)
+- [x] DELETE /api/orgs/[id] (delete - SUPERADMIN only)
 - [ ] GET /api/orgs/[id]/plants (get org plants)
 - [ ] GET /api/orgs/[id]/production (production metrics)
-- [ ] **Tests**: Unit + Integration + Cucumber features
+- [x] **Tests**: Unit tests for OrganizationService
+- [ ] **Tests**: Integration + Cucumber features
 
 ### Phase 3: Vendors
-- [ ] Vendor entity (DynamoDB)
+- [x] Vendor entity (DynamoDB)
+- [x] VendorRepository (DynamoDB implementation)
+- [ ] VendorService
 - [ ] GET /api/vendors (list with RBAC filtering)
 - [ ] POST /api/vendors (create - SUPERADMIN only)
 - [ ] GET /api/vendors/[id] (get single vendor)
-- [ ] PATCH /api/vendors/[id] (update - SUPERADMIN only)
+- [ ] PUT /api/vendors/[id] (update - SUPERADMIN only)
 - [ ] DELETE /api/vendors/[id] (delete - SUPERADMIN only)
 - [ ] POST /api/vendors/[id]/sync-plants (sync plants)
 - [ ] POST /api/vendors/[id]/sync-alerts (sync alerts)
