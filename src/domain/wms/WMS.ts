@@ -137,8 +137,8 @@ export interface WMSDeviceRepository {
   findBySiteId(siteId: number): Promise<WMSDevice[]>
   findByVendorId(vendorId: number): Promise<WMSDevice[]>
   findBySiteAndVendorDeviceId(siteId: number, vendorDeviceId: string): Promise<WMSDevice | null>
-  create(input: CreateWMSDeviceInput): Promise<WMSDevice>
-  update(id: number, updates: Partial<WMSDevice>): Promise<WMSDevice>
+  create(input: CreateWMSDeviceInput, wmsVendorId?: number): Promise<WMSDevice>
+  update(id: number, updates: Partial<WMSDevice>, wmsVendorId?: number): Promise<WMSDevice>
   delete(id: number): Promise<void>
 }
 
