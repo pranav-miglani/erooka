@@ -10,7 +10,7 @@ This document captures all API endpoints from WOMS with their pseudo-code and Dy
 
 ### Accounts
 - GET /api/accounts - List all accounts (SUPERADMIN only)
-- POST /api/accounts - Create account (SUPERADMIN/DEVELOPER only)
+- POST /api/accounts - Create account (SUPERADMIN only, DEVELOPER deprecated)
 
 ### Organizations
 - GET /api/orgs - List all organizations
@@ -21,10 +21,10 @@ This document captures all API endpoints from WOMS with their pseudo-code and Dy
 
 ### Vendors
 - GET /api/vendors - List all vendors
-- POST /api/vendors - Create vendor (SUPERADMIN/DEVELOPER only)
+- POST /api/vendors - Create vendor (SUPERADMIN only, DEVELOPER deprecated)
 - GET /api/vendors/[id] - Get single vendor
 - POST /api/vendors/[id]/sync-plants - Sync plants from vendor
-- GET /api/vendors/sync-status - Get vendor sync status (SUPERADMIN/DEVELOPER only)
+- GET /api/vendors/sync-status - Get vendor sync status (SUPERADMIN only, DEVELOPER deprecated)
 
 ### Plants
 - GET /api/plants - List plants (role-filtered)
@@ -38,7 +38,7 @@ This document captures all API endpoints from WOMS with their pseudo-code and Dy
 
 ### Work Orders
 - GET /api/workorders - List work orders (role-filtered)
-- POST /api/workorders - Create work order (SUPERADMIN/DEVELOPER only)
+- POST /api/workorders - Create work order (SUPERADMIN only, DEVELOPER deprecated)
 - GET /api/workorders/[id] - Get single work order
 - GET /api/workorders/[id]/production - Get work order production metrics
 - POST /api/workorders/[id]/plants - Add plants to work order
@@ -97,7 +97,7 @@ GET /api/me
    - PK = ACCOUNT
    - SK = {accountId}
 4. If account not found → 404 Not Found
-5. If SUPERADMIN/DEVELOPER: Use own logo/displayName
+5. If SUPERADMIN (DEVELOPER deprecated): Use own logo/displayName
    Otherwise: Query first SUPERADMIN account for logo/displayName
 6. Return: { account: {...}, superAdmin: {...} }
 
@@ -132,7 +132,7 @@ DynamoDB Query:
 
 ### POST /api/accounts
 
-**Purpose**: Create new account (SUPERADMIN/DEVELOPER only)
+**Purpose**: Create new account (SUPERADMIN only, DEVELOPER deprecated)
 
 **Pseudo-Code**:
 ```typescript
@@ -140,11 +140,11 @@ POST /api/accounts
 Request: { email, password, account_type, org_id?, display_name? }
 
 1. Validate session
-2. Check permission: SUPERADMIN or DEVELOPER
-3. Validate account_type (SUPERADMIN, ORG, GOVT - not DEVELOPER)
+2. Check permission: SUPERADMIN (DEVELOPER deprecated, treated as SUPERADMIN)
+3. Validate account_type (SUPERADMIN, ORG, GOVT - DEVELOPER deprecated)
 4. Validate org_id:
    - Required if account_type = ORG
-   - Must be null for SUPERADMIN/GOVT/DEVELOPER
+   - Must be null for SUPERADMIN/GOVT
 5. Hash password with bcrypt
 6. Check email uniqueness: Query email-index
 7. For ORG accounts: Check org doesn't already have account
@@ -345,7 +345,7 @@ DynamoDB Query:
 ```typescript
 POST /api/vendors/[id]/sync-plants
 
-1. Validate session (SUPERADMIN/DEVELOPER)
+1. Validate session (SUPERADMIN only, DEVELOPER deprecated)
 2. Get vendor from config table
 3. Get vendor adapter (VendorManager.getAdapter)
 4. Authenticate with vendor API
@@ -373,7 +373,7 @@ DynamoDB Operations:
 ```typescript
 GET /api/vendors/sync-status
 
-1. Validate session (SUPERADMIN/DEVELOPER only)
+1. Validate session (SUPERADMIN only, DEVELOPER deprecated)
 2. Scan config table:
    - Filter: PK = VENDOR
 3. For each vendor, BatchGetItem organizations
@@ -543,7 +543,7 @@ GET /api/workorders?orgId=1
 5. For each work order, Query work-order-plants:
    - PK = WORK_ORDER#{woId}
    - Include plants data
-6. If SUPERADMIN/DEVELOPER and wms_device_id exists:
+6. If SUPERADMIN and wms_device_id exists (DEVELOPER deprecated):
    - BatchGetItem wms_devices from wms table
 7. Return: { workOrders: [...] }
 
@@ -560,7 +560,7 @@ DynamoDB Queries:
 POST /api/workorders
 Request: { title, description, plantIds: [...], wmsDeviceId? }
 
-1. Validate session (SUPERADMIN/DEVELOPER)
+1. Validate session (SUPERADMIN only, DEVELOPER deprecated)
 2. Validate all plants exist (BatchGetItem)
 3. Validate all plants belong to same org
 4. If wmsDeviceId provided:
@@ -601,7 +601,7 @@ GET /api/workorders/[id]
 4. Query work-order-plants:
    - PK = WORK_ORDER#{woId}
    - Include plants with vendor and organization data
-5. If wms_device_id exists and SUPERADMIN/DEVELOPER:
+5. If wms_device_id exists and SUPERADMIN (DEVELOPER deprecated):
    - GetItem wms_device from wms table
    - Include wms_site and wms_vendor data
 6. Return: { workOrder: {...} }
@@ -641,7 +641,7 @@ DynamoDB Queries:
 POST /api/workorders/[id]/plants
 Request: { plantIds: [...] }
 
-1. Validate session (SUPERADMIN/DEVELOPER)
+1. Validate session (SUPERADMIN only, DEVELOPER deprecated)
 2. Get work order from config table
 3. Query existing work-order-plants to get org_id
 4. BatchGetItem plants: Verify existence and org_id matches
@@ -665,7 +665,7 @@ DynamoDB Operations:
 GET /api/dashboard
 
 1. Validate session
-2. If SUPERADMIN/DEVELOPER:
+2. If SUPERADMIN (DEVELOPER deprecated, treated as SUPERADMIN):
    a. Scan config table: PK = WORK_ORDER (count work orders)
    b. Scan plants table (count total plants)
    c. Query work-order-plants: Get all active mappings (extract plant_ids)

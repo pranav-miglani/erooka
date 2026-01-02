@@ -479,7 +479,8 @@ See [DATA_HIERARCHY.md](./DATA_HIERARCHY.md) for complete hierarchy and relation
 See [PRODUCTION_METRICS_DESIGN.md](./PRODUCTION_METRICS_DESIGN.md) for production metrics aggregation strategy.  
 See [DASHBOARD_METRICS_DESIGN.md](./DASHBOARD_METRICS_DESIGN.md) for dashboard-level metrics aggregation (SUPERADMIN/GOVT/ORG).  
 See [API_PSEUDOCODE.md](./API_PSEUDOCODE.md) for complete API pseudo-code and DynamoDB query patterns.  
-See [INDEX_VERIFICATION.md](./INDEX_VERIFICATION.md) for verification that all WOMS SQL indexes are correctly mapped to DynamoDB GSIs.
+See [INDEX_VERIFICATION.md](./INDEX_VERIFICATION.md) for verification that all WOMS SQL indexes are correctly mapped to DynamoDB GSIs.  
+See [DESIGN_PATTERNS.md](./DESIGN_PATTERNS.md) for SOLID principles, design patterns, and architectural best practices.
 
 ## Serverless Architecture
 
@@ -533,7 +534,25 @@ See [INDEX_VERIFICATION.md](./INDEX_VERIFICATION.md) for verification that all W
 - **Timeout**: 30 seconds (API handlers), 2 minutes (sync jobs)
 - **Layers**: Shared code layer (vendor adapters, services, utilities)
 
-## Code Structure (SOLID Principles)
+## Code Structure (SOLID Principles & Design Patterns)
+
+**Design Patterns Applied**:
+- **Repository Pattern**: Abstract data access (all entities)
+- **Factory Pattern**: Vendor adapter creation (`VendorManager`)
+- **Strategy Pattern**: Vendor API implementations (`BaseVendorAdapter` subclasses)
+- **Service Layer Pattern**: Business logic encapsulation
+- **Dependency Injection**: Constructor-based DI throughout
+- **Specification Pattern**: Complex query logic (optional, for advanced filtering)
+- **Builder Pattern**: Complex object construction (query builders, aggregation builders)
+
+**SOLID Principles**:
+- **Single Responsibility**: Each class has one reason to change
+- **Open/Closed**: Open for extension (new vendors), closed for modification
+- **Liskov Substitution**: All vendor adapters are interchangeable
+- **Interface Segregation**: Small, focused interfaces
+- **Dependency Inversion**: Depend on abstractions, not concretions
+
+See [DESIGN_PATTERNS.md](./DESIGN_PATTERNS.md) for detailed pattern documentation.
 
 ```
 erooka/
@@ -617,7 +636,67 @@ erooka/
     └── DEPLOYMENT.md
 ```
 
-## Testing Strategy (TDD + Cucumber)
+## Testing Strategy (TDD + BDD with Cucumber)
+
+### Test-Driven Development (TDD) Approach
+
+**Red-Green-Refactor Cycle**:
+1. **Red**: Write failing test first
+2. **Green**: Write minimal code to pass
+3. **Refactor**: Improve code while keeping tests green
+
+**Test Pyramid**:
+```
+        /\
+       /  \      E2E Tests (5%)
+      /    \
+     /      \    Integration Tests (15%)
+    /        \
+   /__________\  Unit Tests (80%)
+```
+
+**Unit Tests**:
+- Test domain models, services, repositories in isolation
+- Use mocks/stubs for dependencies
+- Fast execution (< 1 second per test)
+- High coverage (>90% target)
+
+**Integration Tests**:
+- Test with DynamoDB Local
+- Test repository implementations
+- Test service + repository integration
+- Test vendor adapter implementations
+
+**E2E Tests**:
+- Test complete API flows
+- Test critical user journeys
+- Use Playwright for frontend E2E
+
+### Behavior-Driven Development (BDD) with Cucumber
+
+**Feature Files Structure**:
+```gherkin
+Feature: Plant Management
+  As a SUPERADMIN
+  I want to manage plants
+  So that I can track solar installations
+
+  Scenario: Create a new plant
+    Given I am authenticated as SUPERADMIN
+    When I create a plant with name "Solar Farm Alpha"
+    Then the plant should be created successfully
+    And the plant should have org_id = 1
+```
+
+**Step Definitions**:
+- Map Gherkin steps to test code
+- Reusable step definitions
+- Clear, readable test scenarios
+
+**Benefits**:
+- Living documentation
+- Business-readable tests
+- Collaboration between devs and stakeholders
 
 ### Test Structure
 
