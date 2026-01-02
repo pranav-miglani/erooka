@@ -59,10 +59,16 @@ export class VendorManager {
   }
 }
 
-// Note: Adapters will be registered here once implemented
-// VendorManager.registerAdapter("SOLARMAN", SolarmanAdapter)
-// VendorManager.registerAdapter("SOLARDM", SolarDmAdapter)
-// VendorManager.registerAdapter("SHINEMONITOR", ShineMonitorAdapter)
-// VendorManager.registerAdapter("PVBLINK", PvBlinkAdapter)
-// VendorManager.registerAdapter("FOXESSCLOUD", FoxesscloudAdapter)
+// Register all vendor adapters
+import { SolarmanAdapter } from "./solarman/SolarmanAdapter"
+import { SolarDmAdapter } from "./solardm/SolarDmAdapter"
+import { ShineMonitorAdapter } from "./shinemonitor/ShineMonitorAdapter"
+import { PvBlinkAdapter } from "./pvblink/PvBlinkAdapter"
+import { FoxesscloudAdapter } from "./foxesscloud/FoxesscloudAdapter"
+
+VendorManager.registerAdapter("SOLARMAN", SolarmanAdapter)
+VendorManager.registerAdapter("SOLARDM", SolarDmAdapter)
+VendorManager.registerAdapter("SHINEMONITOR", ShineMonitorAdapter)
+VendorManager.registerAdapter("PVBLINK", PvBlinkAdapter)
+VendorManager.registerAdapter("FOXESSCLOUD", FoxesscloudAdapter)
 

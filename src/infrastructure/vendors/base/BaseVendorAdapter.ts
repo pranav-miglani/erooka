@@ -111,7 +111,7 @@ export abstract class BaseVendorAdapter {
 
   /**
    * Fetch with authentication
-   * Vendors should implement this to add auth headers
+   * Uses pooledFetch for connection pooling
    */
   protected async fetchWithAuth(
     endpoint: string,
@@ -120,7 +120,7 @@ export abstract class BaseVendorAdapter {
     const token = await this.authenticate()
     const url = `${this.getApiBaseUrl()}${endpoint}`
 
-    return fetch(url, {
+    return pooledFetch(url, {
       ...options,
       headers: {
         ...options.headers,
