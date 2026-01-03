@@ -15,6 +15,8 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb"
 import { DynamoDBPlantRepository } from "../../../infrastructure/dynamodb/repositories/PlantRepository"
 import { DynamoDBOrganizationRepository } from "../../../infrastructure/dynamodb/repositories/OrganizationRepository"
 import { DynamoDBVendorRepository } from "../../../infrastructure/dynamodb/repositories/VendorRepository"
+import { DynamoDBWorkOrderPlantRepository } from "../../../infrastructure/dynamodb/repositories/WorkOrderPlantRepository"
+import { DynamoDBWorkOrderRepository } from "../../../infrastructure/dynamodb/repositories/WorkOrderRepository"
 import { PlantService } from "../../../application/plant/PlantService"
 import { AuthService } from "../../../application/auth/AuthService"
 import { DynamoDBAccountRepository } from "../../../infrastructure/dynamodb/repositories/AccountRepository"
@@ -25,6 +27,8 @@ const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient({}))
 const plantRepository = new DynamoDBPlantRepository(dynamoClient)
 const orgRepository = new DynamoDBOrganizationRepository(dynamoClient)
 const vendorRepository = new DynamoDBVendorRepository(dynamoClient)
+const workOrderPlantRepository = new DynamoDBWorkOrderPlantRepository(dynamoClient)
+const workOrderRepository = new DynamoDBWorkOrderRepository(dynamoClient)
 const plantService = new PlantService(plantRepository, orgRepository, vendorRepository)
 const accountRepository = new DynamoDBAccountRepository(dynamoClient)
 const authService = new AuthService(accountRepository)
@@ -339,6 +343,166 @@ export async function updatePlantHandler(
     }
 
     console.error("Update plant error:", error)
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal server error" }),
+    }
+  }
+}
+
+export async function getUnassignedPlantsHandler(
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
+  try {
+    const sessionData = extractSession(event)
+    
+    if (!sessionData) {
+      return {
+        statusCode: 401,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Unauthorized" }),
+      }
+    }
+
+    requirePermission(sessionData.accountType, "plants", "read")
+
+    // Get orgIds from query params or session
+    const orgIdsParam = event.queryStringParameters?.orgIds
+    let orgIds: number[] = []
+    
+    if (orgIdsParam) {
+      orgIds = orgIdsParam.split(",").map((id) => parseInt(id.trim(), 10)).filter((id) => !isNaN(id))
+    } else if (sessionData.accountType === "ORG" && sessionData.orgId) {
+      orgIds = [sessionData.orgId]
+    } else {
+      // SUPERADMIN/GOVT: Get all orgs
+      const orgs = await orgRepository.findAll()
+      orgIds = orgs.map((o) => o.id)
+    }
+
+    // Get all plants for these orgs
+    const allPlants: any[] = []
+    for (const orgId of orgIds) {
+      const plants = await plantService.listPlants(orgId)
+      allPlants.push(...plants)
+    }
+
+    // Get all active work order plant mappings
+    // Scan work-order-plants table for all active mappings
+    // Note: This is acceptable for unassigned plants query as it's not high-frequency
+    const assignedPlantIds = new Set<number>()
+    
+    // Get all work orders to query their plant mappings
+    const allWorkOrders = await workOrderRepository.findAll()
+    for (const wo of allWorkOrders) {
+      const mappings = await workOrderPlantRepository.findByWorkOrderIdAndActive(wo.id, true)
+      mappings.forEach((m) => assignedPlantIds.add(m.plantId))
+    }
+
+    // Filter out assigned plants
+    const unassignedPlants = allPlants.filter((p) => !assignedPlantIds.has(p.id))
+
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plants: unassignedPlants,
+        total: unassignedPlants.length,
+        assigned: allPlants.length - unassignedPlants.length,
+      }),
+    }
+  } catch (error: any) {
+    if (error.message?.includes("permission")) {
+      return {
+        statusCode: 403,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: error.message }),
+      }
+    }
+
+    console.error("Get unassigned plants error:", error)
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal server error" }),
+    }
+  }
+}
+
+export async function getPlantProductionHandler(
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
+  try {
+    const sessionData = extractSession(event)
+    
+    if (!sessionData) {
+      return {
+        statusCode: 401,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Unauthorized" }),
+      }
+    }
+
+    requirePermission(sessionData.accountType, "plants", "read")
+
+    const plantId = event.pathParameters?.id
+    if (!plantId) {
+      return {
+        statusCode: 400,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Plant ID is required" }),
+      }
+    }
+
+    const plant = await plantService.getPlant(parseInt(plantId))
+
+    // Check permissions - ORG users can only see their own org's plants
+    if (sessionData.accountType === "ORG" && sessionData.orgId !== plant.orgId) {
+      return {
+        statusCode: 403,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Forbidden" }),
+      }
+    }
+
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plantId: plant.id,
+        name: plant.name,
+        production: {
+          capacityKw: plant.capacityKw,
+          currentPowerKw: plant.currentPowerKw,
+          dailyEnergyKwh: plant.dailyEnergyKwh,
+          monthlyEnergyMwh: plant.monthlyEnergyMwh,
+          yearlyEnergyMwh: plant.yearlyEnergyMwh,
+          totalEnergyMwh: plant.totalEnergyMwh,
+          isOnline: plant.isOnline,
+          lastUpdateTime: plant.lastUpdateTime,
+          lastRefreshedAt: plant.lastRefreshedAt,
+        },
+      }),
+    }
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      return {
+        statusCode: 404,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: error.message }),
+      }
+    }
+
+    if (error.message?.includes("permission")) {
+      return {
+        statusCode: 403,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: error.message }),
+      }
+    }
+
+    console.error("Get plant production error:", error)
     return {
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
