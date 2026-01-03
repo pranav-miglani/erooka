@@ -15,7 +15,9 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb"
 import { DynamoDBVendorRepository } from "../../../infrastructure/dynamodb/repositories/VendorRepository"
 import { DynamoDBOrganizationRepository } from "../../../infrastructure/dynamodb/repositories/OrganizationRepository"
+import { DynamoDBPlantRepository } from "../../../infrastructure/dynamodb/repositories/PlantRepository"
 import { VendorService } from "../../../application/vendor/VendorService"
+import { PlantSyncService } from "../../../application/sync/PlantSyncService"
 import { AuthService } from "../../../application/auth/AuthService"
 import { DynamoDBAccountRepository } from "../../../infrastructure/dynamodb/repositories/AccountRepository"
 import { requirePermission } from "../../../shared/rbac/rbac"
@@ -24,7 +26,14 @@ import { ValidationError, NotFoundError } from "../../../shared/errors"
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient({}))
 const vendorRepository = new DynamoDBVendorRepository(dynamoClient)
 const orgRepository = new DynamoDBOrganizationRepository(dynamoClient)
+const plantRepository = new DynamoDBPlantRepository(dynamoClient)
 const vendorService = new VendorService(vendorRepository, orgRepository)
+const plantSyncService = new PlantSyncService(
+  plantRepository,
+  vendorRepository,
+  orgRepository,
+  dynamoClient
+)
 const accountRepository = new DynamoDBAccountRepository(dynamoClient)
 const authService = new AuthService(accountRepository)
 
@@ -367,6 +376,128 @@ export async function deleteVendorHandler(
     }
 
     console.error("Delete vendor error:", error)
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal server error" }),
+    }
+  }
+}
+
+export async function syncVendorPlantsHandler(
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
+  try {
+    const sessionData = extractSession(event)
+    
+    if (!sessionData) {
+      return {
+        statusCode: 401,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Unauthorized" }),
+      }
+    }
+
+    requirePermission(sessionData.accountType, "vendors", "update")
+
+    const vendorId = event.pathParameters?.id
+    if (!vendorId) {
+      return {
+        statusCode: 400,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Vendor ID is required" }),
+      }
+    }
+
+    const vendor = await vendorService.getVendor(parseInt(vendorId))
+    const result = await plantSyncService.syncVendorPlants(vendor)
+
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        success: result.success,
+        synced: result.synced,
+        created: result.created,
+        updated: result.updated,
+        total: result.total,
+        error: result.error,
+      }),
+    }
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      return {
+        statusCode: 404,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: error.message }),
+      }
+    }
+
+    if (error.message?.includes("permission")) {
+      return {
+        statusCode: 403,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: error.message }),
+      }
+    }
+
+    console.error("Sync vendor plants error:", error)
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal server error" }),
+    }
+  }
+}
+
+export async function getVendorSyncStatusHandler(
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
+  try {
+    const sessionData = extractSession(event)
+    
+    if (!sessionData) {
+      return {
+        statusCode: 401,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Unauthorized" }),
+      }
+    }
+
+    requirePermission(sessionData.accountType, "vendors", "read")
+
+    const vendors = await vendorService.listVendors()
+    
+    const vendorsWithStatus = await Promise.all(
+      vendors.map(async (vendor) => {
+        const org = await orgRepository.findById(vendor.orgId)
+        return {
+          id: vendor.id,
+          name: vendor.name,
+          vendorType: vendor.vendorType,
+          orgId: vendor.orgId,
+          organization: org ? { id: org.id, name: org.name } : null,
+          isActive: vendor.isActive,
+          lastSyncedAt: vendor.lastSyncedAt,
+        }
+      })
+    )
+
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vendors: vendorsWithStatus }),
+    }
+  } catch (error: any) {
+    if (error.message?.includes("permission")) {
+      return {
+        statusCode: 403,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: error.message }),
+      }
+    }
+
+    console.error("Get vendor sync status error:", error)
     return {
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
