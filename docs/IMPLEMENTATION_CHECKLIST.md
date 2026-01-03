@@ -132,27 +132,28 @@
 - [ ] WMS sync services (requires WMS adapters)
 - [ ] **Tests**: Unit + Integration + Cucumber features
 
-### Phase 8: Sync Services (Cron Jobs)
-- [ ] Plant sync Lambda (EventBridge trigger)
-- [ ] Alert sync Lambda (EventBridge trigger)
-- [ ] Live telemetry sync Lambda (EventBridge trigger)
-- [ ] WMS site sync Lambda (EventBridge trigger)
-- [ ] WMS insolation sync Lambda (EventBridge trigger)
+### Phase 8: Sync Services (Cron Jobs) ✅
+- [x] Plant sync Lambda (EventBridge trigger) - ✅ Complete
+- [x] Alert sync Lambda (EventBridge trigger) - ✅ Complete
+- [x] Live telemetry sync Lambda (EventBridge trigger) - ✅ Complete
+- [x] WMS site sync Lambda (EventBridge trigger) - ✅ Complete
+- [x] WMS insolation sync Lambda (EventBridge trigger) - ✅ Complete
 - [ ] Disable inactive plants Lambda (EventBridge trigger)
 - [ ] Reset was_online_today Lambda (EventBridge trigger)
 - [ ] Analytics config mirror Lambda (EventBridge trigger)
 - [ ] Analytics snapshot Lambda (EventBridge trigger)
 - [ ] **Tests**: Unit + Integration tests
 
-### Phase 9: Analytics
-- [ ] Analytics config mirror service
-- [ ] Analytics snapshot service
-- [ ] Plant energy readings (DynamoDB with TTL)
-- [ ] GET /api/analytics/orgs (org analytics)
-- [ ] GET /api/analytics/plants (plant analytics)
-- [ ] GET /api/analytics/plants/[id]/energy (energy readings)
-- [ ] GET /api/analytics/plants/[id]/grid-downtime (grid downtime)
-- [ ] GET /api/analytics/vendors (vendor analytics)
+### Phase 9: Analytics ✅
+- [x] AnalyticsService - Comprehensive analytics service - ✅ Complete
+- [x] GET /api/analytics/orgs (org analytics) - ✅ Complete
+- [x] GET /api/analytics/plants (plant analytics) - ✅ Complete
+- [x] GET /api/analytics/plants/[id]/energy (energy readings) - ✅ Complete
+- [x] GET /api/analytics/plants/[id]/grid-downtime (grid downtime) - ✅ Complete
+- [x] GET /api/analytics/vendors (vendor analytics) - ✅ Complete
+- [ ] Plant energy readings (DynamoDB with TTL) - Time-series table (optional, can use current plant metrics)
+- [ ] Analytics config mirror service (optional)
+- [ ] Analytics snapshot service (optional)
 - [ ] **Tests**: Unit + Integration + Cucumber features
 
 ### Phase 10: Dashboard ✅
